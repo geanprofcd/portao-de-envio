@@ -1,0 +1,21 @@
+services:
+  banco:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: portao
+      POSTGRES_PASSWORD: portao
+      POSTGRES_DB: portao
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portao"]
+      interval: 2s
+      retries: 20
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://portao:portao@banco:5432/portao
+      PORTAO_CHAVE: troque-esta-chave
+    ports:
+      - "8000:8000"
+    depends_on:
+      banco:
+        condition: service_healthy
