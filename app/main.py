@@ -37,7 +37,7 @@ def autenticar(x_chave_api: str = Header(default="")) -> None:
 
 
 class Pedido(BaseModel):
-    telefone: str = Field(examples=["(87) 99999-0000"])
+    telefone: str = Field(examples=["(11) 90000-0001"])
     origem: str = Field(examples=["disparo", "followup", "ia"], max_length=40)
     chave: str = Field(description="Chave de idempotência da automação", min_length=8, max_length=200)
 
@@ -56,7 +56,7 @@ def saude():
     return {"ok": True}
 
 
-@app.post("/portao", dependencies=[Depends(autenticar)])
+@app.post("/envios/autorizar", dependencies=[Depends(autenticar)])
 def pedir(p: Pedido):
     with pool.connection() as conn:
         try:
@@ -66,7 +66,7 @@ def pedir(p: Pedido):
     return d.__dict__
 
 
-@app.post("/portao/{reserva_id}/enviado", dependencies=[Depends(autenticar)])
+@app.post("/envios/{reserva_id}/confirmar", dependencies=[Depends(autenticar)])
 def enviado(reserva_id: int):
     with pool.connection() as conn:
         if not portao.confirmar_envio(conn, reserva_id):
@@ -74,7 +74,7 @@ def enviado(reserva_id: int):
     return {"ok": True}
 
 
-@app.post("/portao/{reserva_id}/falhou", dependencies=[Depends(autenticar)])
+@app.post("/envios/{reserva_id}/falha", dependencies=[Depends(autenticar)])
 def falhou(reserva_id: int, f: Falha):
     with pool.connection() as conn:
         if not portao.registrar_falha(conn, reserva_id, f.erro):
@@ -82,7 +82,7 @@ def falhou(reserva_id: int, f: Falha):
     return {"ok": True}
 
 
-@app.post("/recusas", dependencies=[Depends(autenticar)])
+@app.post("/contatos/recusas", dependencies=[Depends(autenticar)])
 def recusar(r: Recusa):
     with pool.connection() as conn:
         tel = portao.registrar_recusa(conn, r.telefone, r.motivo)

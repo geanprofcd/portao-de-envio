@@ -15,12 +15,12 @@ sequenceDiagram
     participant A as Automação
     participant P as Portão (FastAPI)
     participant B as PostgreSQL
-    A->>P: POST /portao {telefone, origem, chave}
+    A->>P: POST /envios/autorizar {telefone, origem, chave}
     P->>B: trava o telefone (advisory lock)
     B-->>P: chave já usada? recusa? envio recente? freio?
     P-->>A: pode_enviar = true + reserva_id
     A->>A: envia pelo provedor
-    A->>P: POST /portao/{id}/enviado (ou /falhou)
+    A->>P: POST /envios/{id}/confirmar (ou /falha)
 ```
 
 Regras, na ordem:
@@ -53,15 +53,15 @@ docker compose up --build
 ```
 
 ```bash
-curl -X POST localhost:8000/portao -H "X-Chave-Api: troque-esta-chave" -H "Content-Type: application/json" -d '{"telefone": "(87) 99999-0000", "origem": "disparo", "chave": "campanha-1-contato-1"}'
+curl -X POST localhost:8000/envios/autorizar -H "X-Chave-Api: troque-esta-chave" -H "Content-Type: application/json" -d '{"telefone": "(11) 90000-0001", "origem": "disparo", "chave": "campanha-1-contato-1"}'
 ```
 
 | Rota | O que faz |
 |---|---|
-| `POST /portao` | Pede autorização para enviar |
-| `POST /portao/{id}/enviado` | Confirma que a mensagem saiu |
-| `POST /portao/{id}/falhou` | Registra falha e libera nova tentativa |
-| `POST /recusas` | Registra que o contato pediu para parar |
+| `POST /envios/autorizar` | Pede autorização para enviar |
+| `POST /envios/{id}/confirmar` | Confirma que a mensagem saiu |
+| `POST /envios/{id}/falha` | Registra falha e libera nova tentativa |
+| `POST /contatos/recusas` | Registra que o contato pediu para parar |
 | `GET /saude` | Verificação simples |
 
 Configuração por ambiente: `DATABASE_URL`, `PORTAO_CHAVE` (obrigatória), `PORTAO_JANELA_HORAS`, `PORTAO_FREIO_FALHAS`, `PORTAO_FREIO_MINUTOS`.
