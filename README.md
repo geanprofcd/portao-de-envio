@@ -34,6 +34,8 @@ Tudo roda numa transação com `pg_advisory_xact_lock` por telefone. Duas automa
 
 ## Testes
 
+> O portão não envia mensagens: ele só autoriza ou recusa. Os telefones dos exemplos e dos testes são fictícios e servem só para checar o formato; nunca use número real de alguém ao testar uma integração.
+
 ```bash
 pip install -r requirements-dev.txt
 DATABASE_URL=postgresql://... python -m pytest -v

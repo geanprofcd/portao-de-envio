@@ -1,3 +1,4 @@
+# Telefones usados nos testes são fictícios, só para validar formato e regras. O portão nunca envia mensagens.
 import os
 
 import psycopg
